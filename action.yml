@@ -1,6 +1,6 @@
 name: 'Duplicate Run Action'
 description: 'Detect and skip duplicate workflow runs by comparing git tree hashes'
-author: ''
+author: 'leavesster'
 
 inputs:
   token:
