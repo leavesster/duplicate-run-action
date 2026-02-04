@@ -1,37 +1,10 @@
 # duplicate-run-action
 
-Detect and skip duplicate GitHub Actions workflow runs by comparing git tree hashes.
+English | [中文](./README.zh-CN.md)
 
-## The Problem
+> **Same code, one CI run.**
 
-Workflows triggered by both `push` and `pull_request` fire twice when a PR is merged:
-
-```
-PR #42 merged into main
-  ├── pull_request (closed, merged=true)   ← run A
-  └── push (refs/heads/main)               ← run B  (same code, wasted run)
-```
-
-The two commits have different SHAs (merge commit vs PR head), but the actual code content is identical.
-
-## How It Works
-
-Git stores each commit's file tree as a separate hash (`tree.sha`). Two commits with the same code produce the same tree hash, regardless of commit metadata.
-
-```
-PR head commit:    abc1234  →  tree: 9f8e7d6...
-Merge commit:      def5678  →  tree: 9f8e7d6...  ← same tree = same code
-```
-
-This action:
-
-1. Fetches the current commit's tree hash via GitHub API
-2. Queries recent successful runs of the same workflow
-3. Compares tree hashes — if a match exists, the code already passed
-4. Optionally checks concurrent in-progress runs to avoid parallel duplicates
-5. Outputs `is_duplicate=true` for downstream jobs to act on
-
-No `actions/checkout` required. Runs entirely through the GitHub API.
+When a PR is merged, both `push` and `pull_request` events fire, running CI twice on identical code. This Action compares git tree hashes to detect duplicates and skip wasted runs.
 
 ## Quick Start
 
@@ -52,7 +25,7 @@ jobs:
     steps:
       - name: Check for duplicate runs
         id: dedup-check
-        uses: your-name/duplicate-run-action@v1
+        uses: leavesster/duplicate-run-action@v0.1
 
   build:
     needs: check-duplicate
@@ -70,6 +43,17 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm test
 ```
+
+## How It Works
+
+Every git commit has a tree hash representing its file content snapshot. Two commits with different SHAs but identical code will have the same tree hash:
+
+```
+PR head commit:    abc1234  →  tree: 9f8e7d6...
+Merge commit:      def5678  →  tree: 9f8e7d6...  ← same tree = same code
+```
+
+This Action fetches tree hashes via GitHub API and compares them against recent successful runs. No checkout required — pure API calls.
 
 ## Inputs
 
