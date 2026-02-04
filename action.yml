@@ -1,0 +1,35 @@
+name: 'Duplicate Run Action'
+description: 'Detect and skip duplicate workflow runs by comparing git tree hashes'
+author: ''
+
+inputs:
+  token:
+    description: 'GitHub token with actions:read permission'
+    required: false
+    default: ${{ github.token }}
+  max_history:
+    description: 'Maximum number of historical successful runs to check'
+    required: false
+    default: '10'
+  check_concurrent:
+    description: 'Whether to check concurrent in-progress runs'
+    required: false
+    default: 'true'
+
+outputs:
+  is_duplicate:
+    description: 'Whether the current run is a duplicate'
+  reason:
+    description: 'Reason for the decision'
+  matched_run_id:
+    description: 'ID of the matched duplicate run (if any)'
+  tree_hash:
+    description: 'Tree hash of the current commit'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'skip-forward'
+  color: 'blue'

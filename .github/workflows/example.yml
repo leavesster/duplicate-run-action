@@ -1,0 +1,48 @@
+# Example workflow demonstrating duplicate-run-action usage
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-duplicate:
+    runs-on: ubuntu-latest
+    outputs:
+      is_duplicate: ${{ steps.dedup-check.outputs.is_duplicate }}
+      reason: ${{ steps.dedup-check.outputs.reason }}
+    steps:
+      - name: Check for duplicate runs
+        id: dedup-check
+        uses: ./
+        with:
+          max_history: 10
+          check_concurrent: 'true'
+
+      - name: Log result
+        run: |
+          echo "Is duplicate: ${{ steps.dedup-check.outputs.is_duplicate }}"
+          echo "Reason: ${{ steps.dedup-check.outputs.reason }}"
+          echo "Tree hash: ${{ steps.dedup-check.outputs.tree_hash }}"
+
+  build:
+    needs: check-duplicate
+    if: needs.check-duplicate.outputs.is_duplicate != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: echo "Building..."
+
+  test:
+    needs: check-duplicate
+    if: needs.check-duplicate.outputs.is_duplicate != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test
+        run: echo "Testing..."
