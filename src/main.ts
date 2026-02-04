@@ -3,6 +3,18 @@ import * as github from '@actions/github'
 import { GitHubApi } from './api'
 import { detectDuplicate } from './detect'
 
+function getWorkflowFileName(): string {
+  // GITHUB_WORKFLOW_REF format: {owner}/{repo}/.github/workflows/{filename}@{ref}
+  const workflowRef = process.env.GITHUB_WORKFLOW_REF
+  if (workflowRef) {
+    const match = workflowRef.match(/\.github\/workflows\/([^@]+)/)
+    if (match) {
+      return match[1]
+    }
+  }
+  throw new Error('Cannot determine workflow file name from GITHUB_WORKFLOW_REF')
+}
+
 async function run(): Promise<void> {
   try {
     const token = core.getInput('token', { required: true })
@@ -10,7 +22,7 @@ async function run(): Promise<void> {
     const checkConcurrent = core.getInput('check_concurrent') !== 'false'
 
     const { owner, repo } = github.context.repo
-    const workflowId = github.context.workflow
+    const workflowId = getWorkflowFileName()
     const currentRunId = github.context.runId
     const currentSha = github.context.sha
 

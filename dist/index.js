@@ -30149,13 +30149,24 @@ const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const api_1 = __nccwpck_require__(6879);
 const detect_1 = __nccwpck_require__(1052);
+function getWorkflowFileName() {
+    // GITHUB_WORKFLOW_REF format: {owner}/{repo}/.github/workflows/{filename}@{ref}
+    const workflowRef = process.env.GITHUB_WORKFLOW_REF;
+    if (workflowRef) {
+        const match = workflowRef.match(/\.github\/workflows\/([^@]+)/);
+        if (match) {
+            return match[1];
+        }
+    }
+    throw new Error('Cannot determine workflow file name from GITHUB_WORKFLOW_REF');
+}
 async function run() {
     try {
         const token = core.getInput('token', { required: true });
         const maxHistory = parseInt(core.getInput('max_history'), 10) || 10;
         const checkConcurrent = core.getInput('check_concurrent') !== 'false';
         const { owner, repo } = github.context.repo;
-        const workflowId = github.context.workflow;
+        const workflowId = getWorkflowFileName();
         const currentRunId = github.context.runId;
         const currentSha = github.context.sha;
         core.info(`Checking for duplicate runs...`);
