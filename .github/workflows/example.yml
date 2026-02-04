@@ -11,11 +11,12 @@ jobs:
   check-duplicate:
     runs-on: ubuntu-latest
     outputs:
-      is_duplicate: ${{ steps.dedup-check.outputs.is_duplicate }}
-      reason: ${{ steps.dedup-check.outputs.reason }}
+      is_duplicate: ${{ steps.duplicate-check.outputs.is_duplicate }}
+      reason: ${{ steps.duplicate-check.outputs.reason }}
     steps:
+      - uses: actions/checkout@v6
       - name: Check for duplicate runs
-        id: dedup-check
+        id: duplicate-check
         uses: ./
         with:
           max_history: 10
@@ -23,16 +24,16 @@ jobs:
 
       - name: Log result
         run: |
-          echo "Is duplicate: ${{ steps.dedup-check.outputs.is_duplicate }}"
-          echo "Reason: ${{ steps.dedup-check.outputs.reason }}"
-          echo "Tree hash: ${{ steps.dedup-check.outputs.tree_hash }}"
+          echo "Is duplicate: ${{ steps.duplicate-check.outputs.is_duplicate }}"
+          echo "Reason: ${{ steps.duplicate-check.outputs.reason }}"
+          echo "Tree hash: ${{ steps.duplicate-check.outputs.tree_hash }}"
 
   build:
     needs: check-duplicate
     if: needs.check-duplicate.outputs.is_duplicate != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build
         run: echo "Building..."
@@ -42,7 +43,7 @@ jobs:
     if: needs.check-duplicate.outputs.is_duplicate != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Test
         run: echo "Testing..."
