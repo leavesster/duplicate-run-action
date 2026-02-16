@@ -27,9 +27,13 @@ outputs:
     description: 'Tree hash of the current commit'
 
 runs:
-  using: 'node24'
+  using: 'node20'
   main: 'dist/index.js'
 
 branding:
   icon: 'skip-forward'
   color: 'blue'
+
+categories:
+  - 'Continuous integration'
+  - 'Utilities'
