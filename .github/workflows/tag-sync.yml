@@ -27,3 +27,13 @@ jobs:
             NEW_TAG="v0.1"
             git tag -f $NEW_TAG ${{ github.ref }}
             git push origin -f $NEW_TAG
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+            TAG="${GITHUB_REF#refs/tags/}"
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --generate-notes \
+              --latest
